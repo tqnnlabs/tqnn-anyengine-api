@@ -376,3 +376,8 @@ The architecture
 
 
 The Core remains sealed.
+
+---
+
+🔗 Live Endpoint (Coming Soon)
+https://api.tqnn.dev
