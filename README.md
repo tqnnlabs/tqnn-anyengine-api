@@ -371,8 +371,3 @@ The architecture
 
 
 The Core remains sealed.
-
-
----
-
-End of README
