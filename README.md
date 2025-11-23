@@ -4,7 +4,8 @@ The TQNN Core Engine is a protected trade secret.
 This repository provides only the API interface and client utilities.
 No inference substrate, internal algorithms, or architectural logic are present.
 
-Unauthorized attempts to extract, replicate, or reverse-engineer substrate logic will result in immediate access termination and legal action.
+Unauthorized attempts to extract, replicate, or reverse-engineer substrate logic
+will result in immediate access termination and legal action.
 
 
 ---
@@ -22,7 +23,8 @@ Modes supported: EEG / Finance / Tabular / Image / Any-Data
 TQNN — Tubulin Quantum Neural Network
 A quantum-inspired computational substrate.
 
-The system converts structured numeric data into high-dimensional inference embeddings and phase-based decision outputs.
+The system converts structured numeric data into high-dimensional inference embeddings
+and phase-based decision outputs.
 
 > ⚠️ The Core substrate is NOT provided in this repository.
 
@@ -50,7 +52,8 @@ intent vector
 decision geometry
 
 
-The engine behaves as a quantum-inspired inference oracle, not a train-and-predict model.
+The engine behaves as a quantum-inspired inference oracle,
+not a train-and-predict model.
 
 
 ---
@@ -75,7 +78,7 @@ Output: directional probability, phase confidence, action geometry
 Image (Beta)
 
 Input: flattened or tensor image
-Output: perceptual probabilities, embed vectors
+Output: perceptual probabilities, embedding vectors
 
 > Any structured numeric array can be used as input.
 
@@ -86,19 +89,19 @@ Output: perceptual probabilities, embed vectors
 
 🔑 Authentication
 
-Every customer receives an API key tied to subscription tier.
+Customers receive an API key tied to a subscription tier.
 
 Send via HTTP header:
 
 x-api-key: YOUR_TQNN_API_KEY
 
-Usage is tracked at runtime.
+Usage is tracked at runtime
 
-Quotas are enforced.
+Quotas are enforced
 
-Overage requests are billed automatically.
+Overages are billed automatically
 
-Substrate logic is never exposed.
+Core substrate logic is never exposed
 
 
 
@@ -106,7 +109,7 @@ Substrate logic is never exposed.
 
 📦 Client Installation
 
-The official PyPI client will be distributed as:
+Official PyPI package (coming soon):
 
 pip install tqnn-client
 
@@ -115,9 +118,7 @@ Until release, use the provided tqnn_client.py.
 
 ---
 
-🚀 Quickstart Example
-
-Tabular inference
+🚀 Quickstart Example — Tabular
 
 from tqnn_client import TQNNClient
 import os
@@ -146,7 +147,7 @@ print(result)
 
 📫 API Response Format
 
-Example response:
+Example:
 
 {
   "mode": "TABULAR",
@@ -195,9 +196,9 @@ Core substrate
 
 Inference algorithms
 
-GHZ models
+Architectural models
 
-Architectural state logic
+Internal runtimes
 
 
 
@@ -212,20 +213,20 @@ This project is dual-licensed.
 
 ✔️ MIT License — Open Layer
 
-MIT applies to:
+Applies to:
 
 API wrapper
 
 Integration libraries
 
-SDK client utilities
+SDK utilities
 
 Example scripts
 
 Public demos
 
 
-You may:
+You may freely:
 
 Use
 
@@ -251,8 +252,6 @@ Tubulin substrate architecture
 
 Quantum-inspired inference substrate
 
-GHZ-level phase routing models
-
 Qualia & intent embeddings
 
 Internal runtimes and training pipelines
@@ -260,7 +259,8 @@ Internal runtimes and training pipelines
 
 Access requires:
 
-Paid subscription or
+Paid subscription
+or
 
 Enterprise licensing agreement
 
@@ -278,29 +278,29 @@ Public API endpoints
 
 Client utilities
 
-Usage examples
+Integration examples
 
 
 This repository does not contain:
 
 Substrate logic
 
-GHZ inference circuits
+Inference circuits
 
-Phase models
+Decision models
 
-Training mechanisms
+Architectural mechanisms
 
 
 Attempts to:
 
 reverse-engineer
 
-recreate GHZ inference systems
+simulate substrate behavior
 
 train competitor models using embeddings
 
-reconstruct substrate architecture
+reconstruct internal logic
 
 
 constitute trade secret infringement.
@@ -349,8 +349,7 @@ GPU acceleration
 
 📬 Contact
 
-For enterprise licensing and integration:
-
+Enterprise licensing & integration:
 tqnnlabs@gmail.com
 
 
@@ -360,7 +359,7 @@ Final Reminder
 
 This repository provides:
 
-The API surface
+API surface
 
 Client utilities
 
