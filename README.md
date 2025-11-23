@@ -1,6 +1,8 @@
 # tqnn-anyengine-api
 Public SaaS API for TQNN AnyEngine (EEG / Finance / Tabular / Any-Data)
 
+TQNN is patent-pending. All proprietary components are protected.
+
 ## Licensing
 
 This project is **dual-licensed**:
