@@ -12,7 +12,6 @@ will result in immediate access termination and legal action.
 
 🔹 TQNN AnyEngine API
 
-A quantum-inspired substrate that infers state from raw data without training, weights, or gradient descent.
 
 Public SaaS API for TQNN AnyEngine
 Modes supported: EEG / Finance / Tabular / Image / Any-Data
