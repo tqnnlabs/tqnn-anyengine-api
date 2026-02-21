@@ -1,3 +1,7 @@
 numpy
 requests
+fastapi
+uvicorn[standard]
 pydantic
+stripe
+python-dotenv
