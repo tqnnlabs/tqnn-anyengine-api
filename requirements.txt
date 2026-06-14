@@ -5,3 +5,5 @@ uvicorn[standard]
 pydantic
 stripe
 python-dotenv
+google-cloud-firestore
+sendgrid
