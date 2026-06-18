@@ -1,389 +1,193 @@
-⚠️ NOTICE — PROTECTED TRADE SECRET
+TQNN AnyEngine API
 
-The TQNN Core Engine is a protected trade secret.
-This repository provides only the API interface and client utilities.
-No inference substrate, internal algorithms, or architectural logic are present.
+Commercial multimodal inference API from TQNN Labs.
 
-Unauthorized attempts to extract, replicate, or reverse-engineer substrate logic
-will result in immediate access termination and legal action.
-
+Process structured data through the TQNN AnyEngine runtime using a simple REST API or the official Python SDK.
 
 ---
 
-🔹 TQNN AnyEngine API
+Overview
 
+TQNN AnyEngine provides API-accessible inference across multiple data domains through a unified runtime interface.
 
-Public SaaS API for TQNN AnyEngine
-Modes supported: EEG / Finance / Tabular / Image / Any-Data
+Supported modes:
 
+- EEG
+- Finance
+- Chemistry
+- Text
+- Tabular
+- Image
+- Any-Data
 
----
-
-🌐 Overview
-
-TQNN — Tubulin Quantum Neural Network
-A quantum-inspired computational substrate.
-
-The system converts structured numeric data into high-dimensional inference embeddings
-and phase-based decision outputs.
-
-> ⚠️ The Core substrate is NOT provided in this repository.
-
-
-
-Unlike classical ML systems:
-
-No training loops
-
-No gradient descent
-
-No weights or tuning
-
-
-You send structured data → the substrate returns:
-
-inference probabilities
-
-activation threshold (tau)
-
-qualia embedding snapshot
-
-intent vector
-
-decision geometry
-
-
-The engine behaves as a quantum-inspired inference oracle,
-not a train-and-predict model.
-
+The runtime is delivered as a managed cloud service.
 
 ---
 
-🧠 Functional Modes
+Install
 
-EEG
-
-Input: (channels × samples) matrix
-Output: state basins, coherence bands, intent vectors
-
-Tabular
-
-Input: row-wise numeric samples
-Output: class basin, phase threshold, decision quality
-
-Finance
-
-Input: OHLCV, indicators, rolling features
-Output: directional probability, phase confidence, action geometry
-
-Image (Beta)
-
-Input: flattened or tensor image
-Output: perceptual probabilities, embedding vectors
-
-> Any structured numeric array can be used as input.
-
-
-
+pip install tqnn
 
 ---
 
-🔑 Authentication
+Quick Start
 
-Customers receive an API key tied to a subscription tier.
+from tqnn import TQNNClient
 
-Send via HTTP header:
-
-x-api-key: YOUR_TQNN_API_KEY
-
-Usage is tracked at runtime
-
-Quotas are enforced
-
-Overages are billed automatically
-
-Core substrate logic is never exposed
-
-
-
----
-
-📦 Client Installation
-
-Official PyPI package (coming soon):
-
-pip install tqnn-client
-
-Until release, use the provided tqnn_client.py.
-
-
----
-
-🚀 Quickstart Example — Tabular
-
-from tqnn_client import TQNNClient
-import os
-
-BASE_URL = os.getenv("TQNN_API_URL", "https://YOUR-TQNN-ENDPOINT")
-API_KEY  = os.getenv("TQNN_API_KEY", "YOUR_KEY")
-
-client = TQNNClient(api_key=API_KEY, base_url=BASE_URL)
-
-data = [
-    [1.2, 0.4, 3.3, 0.1],
-    [2.1, 1.1, 0.9, 0.5],
-    [0.7, 0.3, 1.2, 2.1]
-]
+client = TQNNClient(
+    api_key="TQNN_xxxxxxxxxxxxxxxxx"
+)
 
 result = client.run_any(
-    data=data,
-    mode="TABULAR",
-    label="demo_table"
+    data=[1, 2, 3, 4],
+    mode="ANY"
 )
 
 print(result)
 
+---
+
+Get an API Key
+
+Choose a subscription plan and receive an API key automatically after successful checkout.
+
+Tier 1 — Starter
+
+- CA$23.99/month
+- 10,000 API calls
+
+Tier 2 — Builder
+
+- CA$79.99/month
+- 50,000 API calls
+
+Tier 3 — Scale
+
+- CA$249.99/month
+- 200,000 API calls
+
+Sign up:
+
+https://tqnnlabs.com
 
 ---
 
-📫 API Response Format
+REST API Example
+
+curl -X POST https://api.tqnnlabs.com/run/any \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: TQNN_xxxxxxxxx" \
+  -d '{
+    "data": [1,2,3,4],
+    "mode": "ANY"
+  }'
+
+---
+
+Example Response
+
+{
+  "mode": "ANY",
+  "label": "demo",
+  "probs": [0.31, 0.22, 0.47],
+  "threshold": 0.61,
+  "qualia": {},
+  "intent": [],
+  "meta": {}
+}
+
+---
+
+Authentication
+
+All API requests require an API key:
+
+x-api-key: TQNN_xxxxxxxxx
+
+Usage is tracked automatically.
+
+---
+
+API Documentation
+
+Interactive API Docs:
+
+https://api.tqnnlabs.com/docs
+
+Health Endpoint:
+
+https://api.tqnnlabs.com/health
+
+---
+
+SDK
+
+Official Python SDK:
+
+pip install tqnn
 
 Example:
 
-{
-  "mode": "TABULAR",
-  "label": "demo_table",
-  "probs": [0.18, 0.44, 0.38],
-  "threshold": 0.613,
-  "qualia": "...",
-  "intent": "...",
-  "usage": 41
-}
+from tqnn import TQNNClient
 
-Field meanings
+client = TQNNClient(api_key="TQNN_xxxxxxxxx")
 
-probs — inference probability distribution
-
-threshold — activation score (tau)
-
-qualia — substrate embedding snapshot
-
-intent — decision geometry
-
-usage — runtime quota counter
-
-
+result = client.run_any(
+    data=[1, 2, 3, 4],
+    mode="TABULAR"
+)
 
 ---
 
-📂 Repository Contents
+Repository Contents
 
 Included:
 
-API wrapper utilities
+- API interface
+- SDK utilities
+- Client examples
+- Integration samples
+- Public documentation
 
-SDK client code
+Not Included:
 
-Request/response schemas
-
-Integration examples
-
-Public demos
-
-
-Not included:
-
-Core substrate
-
-Inference algorithms
-
-Architectural models
-
-Internal runtimes
-
-
+- Internal runtime implementation
+- Proprietary infrastructure
+- Private deployment assets
 
 ---
 
-🛡️ Licensing
+Licensing
 
-This project is dual-licensed.
+MIT License applies to:
 
+- SDK
+- Client libraries
+- Examples
+- Integration utilities
 
----
+See LICENSE for details.
 
-✔️ MIT License — Open Layer
-
-Applies to:
-
-API wrapper
-
-Integration libraries
-
-SDK utilities
-
-Example scripts
-
-Public demos
-
-
-You may freely:
-
-Use
-
-Modify
-
-Integrate
-
-Redistribute
-
-
-See LICENSE.
-
+The managed TQNN runtime service remains proprietary intellectual property of TQNN Labs.
 
 ---
 
-🔒 Proprietary License — Core IP Locked
+Enterprise Access
 
-The following are closed-source and protected:
+For enterprise deployment, custom integrations, licensing, or commercial partnerships:
 
-TQNN Core Engine
-
-Tubulin substrate architecture
-
-Quantum-inspired inference substrate
-
-Qualia & intent embeddings
-
-Internal runtimes and training pipelines
-
-
-Access requires:
-
-Paid subscription
-or
-
-Enterprise licensing agreement
-
-
-See TQNN-Core-License.md.
-
-
----
-
-⚠️ Important Notice
-
-This repository contains:
-
-Public API endpoints
-
-Client utilities
-
-Integration examples
-
-
-This repository does not contain:
-
-Substrate logic
-
-Inference circuits
-
-Decision models
-
-Architectural mechanisms
-
-
-Attempts to:
-
-reverse-engineer
-
-simulate substrate behavior
-
-train competitor models using embeddings
-
-reconstruct internal logic
-
-
-constitute trade secret infringement.
-
-
----
-
-💳 Billing Model
-
-Tier	Monthly Requests	Intended Use
-
-Tier 1	10,000	Builders / Research
-Tier 2	50,000	Startups / Teams
-Tier 3	200,000	Enterprise / Multi-modal
-
-
-After quota exhaustion:
-
-Requests continue
-
-Per-unit billing applies
-
-Core engine remains sealed
-
-
-
----
-
-🗺 Roadmap
-
-PyPI client package
-
-CLI tooling
-
-Multi-modal SDK modules
-
-Android edge inference
-
-Enterprise substrate clusters
-
-GPU acceleration
-
-
-
----
-
-📬 Contact
-
-Enterprise licensing & integration:
 tqnnlabs@gmail.com
 
-
 ---
 
-Final Reminder
+About TQNN Labs
 
-This repository provides:
+TQNN Labs develops multimodal inference infrastructure and runtime services for structured data applications.
 
-API surface
+Website:
+https://tqnnlabs.com
 
-Client utilities
+Contact:
+tqnnlabs@gmail.com
 
-Usage examples
-
-
-It does not provide:
-
-The substrate
-
-The inference models
-
-The architecture
-
-
-The Core remains sealed.
-
----
-
-Built by TQNN Labs — A solo research effort.
-Contact: tqnnlabs@gmail.com
-
----
-
-🔗 Live Endpoint (Coming Soon)
-https://api.tqnn.dev
+Built in Canada.
