@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import FastAPI, HTTPException, Header, Request, Query
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from typing import Any, Dict, List, Optional
 from google.cloud import firestore
 from sendgrid import SendGridAPIClient
@@ -85,7 +85,7 @@ class RunResponse(BaseModel):
 
 
 class CheckoutRequest(BaseModel):
-    customer_email: EmailStr
+    customer_email: str
     tier: str = "tier1"
 
 
@@ -270,6 +270,10 @@ def create_stripe_checkout_session(req: CheckoutRequest) -> str:
     if not STRIPE_SECRET_KEY:
         raise HTTPException(status_code=500, detail="Stripe not configured")
 
+    customer_email = str(req.customer_email).strip()
+    if "@" not in customer_email or "." not in customer_email:
+        raise HTTPException(status_code=400, detail="Invalid email")
+
     tier = req.tier.lower().strip()
     price_id = PRICE_BY_TIER.get(tier)
 
@@ -285,12 +289,12 @@ def create_stripe_checkout_session(req: CheckoutRequest) -> str:
             success_url=SUCCESS_URL,
             cancel_url=CANCEL_URL,
             line_items=[{"price": price_id, "quantity": 1}],
-            customer_email=str(req.customer_email),
+            customer_email=customer_email,
             metadata={"tqnn_tier": tier},
             subscription_data={
                 "metadata": {
                     "tqnn_tier": tier,
-                    "customer_email": str(req.customer_email),
+                    "customer_email": customer_email,
                 }
             },
         )
@@ -490,7 +494,7 @@ def create_checkout(req: CheckoutRequest):
 @app.get("/billing/checkout/{tier}")
 def checkout_redirect(
     tier: str,
-    customer_email: EmailStr = Query(...),
+    customer_email: str = Query(...),
 ):
     """
     Browser-friendly checkout endpoint.
