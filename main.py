@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from fastapi import FastAPI, HTTPException, Header, Request
-from fastapi.responses import HTMLResponse
-from pydantic import BaseModel
+from fastapi import FastAPI, HTTPException, Header, Request, Query
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, EmailStr
 from typing import Any, Dict, List, Optional
 from google.cloud import firestore
 from sendgrid import SendGridAPIClient
@@ -32,13 +33,15 @@ INTERNAL_CORE_SECRET = os.environ.get("INTERNAL_CORE_SECRET", "")
 SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY", "")
 FROM_EMAIL = os.environ.get("FROM_EMAIL", "tqnnlabs@gmail.com")
 
+PUBLIC_SITE_URL = os.environ.get("PUBLIC_SITE_URL", "https://tqnnlabs.com").rstrip("/")
+
 SUCCESS_URL = os.environ.get(
     "SUCCESS_URL",
-    "https://tqnnlabs.com/tqnn-success?session_id={CHECKOUT_SESSION_ID}",
+    f"{PUBLIC_SITE_URL}/tqnn-success?session_id={{CHECKOUT_SESSION_ID}}",
 )
 CANCEL_URL = os.environ.get(
     "CANCEL_URL",
-    "https://tqnnlabs.com/tqnn-cancel",
+    f"{PUBLIC_SITE_URL}/tqnn-cancel",
 )
 
 if STRIPE_SECRET_KEY:
@@ -82,7 +85,7 @@ class RunResponse(BaseModel):
 
 
 class CheckoutRequest(BaseModel):
-    customer_email: str
+    customer_email: EmailStr
     tier: str = "tier1"
 
 
@@ -263,11 +266,63 @@ def require_api_key(api_key: str) -> Dict[str, Any]:
     return info
 
 
+def create_stripe_checkout_session(req: CheckoutRequest) -> str:
+    if not STRIPE_SECRET_KEY:
+        raise HTTPException(status_code=500, detail="Stripe not configured")
+
+    tier = req.tier.lower().strip()
+    price_id = PRICE_BY_TIER.get(tier)
+
+    if tier not in PRICE_BY_TIER:
+        raise HTTPException(status_code=400, detail=f"Unknown tier: {tier}")
+
+    if not price_id:
+        raise HTTPException(status_code=500, detail=f"Stripe price ID not configured for {tier}")
+
+    try:
+        session = stripe.checkout.Session.create(
+            mode="subscription",
+            success_url=SUCCESS_URL,
+            cancel_url=CANCEL_URL,
+            line_items=[{"price": price_id, "quantity": 1}],
+            customer_email=str(req.customer_email),
+            metadata={"tqnn_tier": tier},
+            subscription_data={
+                "metadata": {
+                    "tqnn_tier": tier,
+                    "customer_email": str(req.customer_email),
+                }
+            },
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Stripe error: {e}")
+
+    if not session.url:
+        raise HTTPException(status_code=500, detail="Stripe did not return a checkout URL")
+
+    return session.url
+
+
 # ======================================================
 # FASTAPI
 # ======================================================
 
-app = FastAPI(title="TQNN AnyEngine API", version="1.0.0")
+app = FastAPI(title="TQNN AnyEngine API", version="1.0.1")
+
+# CORS is useful for the JS checkout version and future browser sandbox.
+# The GET redirect checkout route below works even without CORS.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://tqnnlabs.com",
+        "https://www.tqnnlabs.com",
+        "http://localhost:3000",
+        "http://localhost:5173",
+    ],
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "x-api-key", "Stripe-Signature"],
+)
 
 
 @app.get("/")
@@ -277,6 +332,8 @@ def root():
         "docs": "/docs",
         "health": "/health",
         "store": "/store",
+        "checkout_get": "/billing/checkout/{tier}?customer_email=you@example.com",
+        "checkout_post": "/billing/checkout",
     }
 
 
@@ -288,6 +345,10 @@ def health():
         "core_configured": bool(CORE_URL),
         "firestore": "enabled",
         "email": bool(SENDGRID_API_KEY),
+        "stripe": bool(STRIPE_SECRET_KEY),
+        "tier1_price": bool(STRIPE_PRICE_TIER1),
+        "tier2_price": bool(STRIPE_PRICE_TIER2),
+        "tier3_price": bool(STRIPE_PRICE_TIER3),
     }
 
 
@@ -358,7 +419,6 @@ def run_any(
         intent=list(result.get("intent", [])),
         meta=dict(result.get("meta", {})),
     )
-    
 
 
 @app.get("/store", response_class=HTMLResponse)
@@ -375,33 +435,26 @@ def tqnn_store():
           <h1>TQNN Market</h1>
           <p>Choose a runtime access tier.</p>
 
+          <input id="email" placeholder="you@example.com" style="padding:10px;min-width:260px;">
+          <br><br>
+
           <button onclick="startCheckout('tier1')">Starter - $23.99/month</button>
-          <button onclick="startCheckout('tier2')">Pro - $79.99/month</button>
-          <button onclick="startCheckout('tier3')">Lab - $249.99/month</button>
+          <button onclick="startCheckout('tier2')">Builder - $79.99/month</button>
+          <button onclick="startCheckout('tier3')">Scale - $249.99/month</button>
 
           <p id="status"></p>
 
           <script>
-            async function startCheckout(tier) {
-              const email = prompt("Enter your email:");
-              if (!email) return;
-
-              const status = document.getElementById("status");
-              status.textContent = "Creating Stripe checkout session...";
-
-              const res = await fetch("/billing/checkout", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({customer_email: email, tier})
-              });
-
-              const data = await res.json();
-
-              if (data.checkout_url) {
-                window.location = data.checkout_url;
-              } else {
-                status.textContent = "Error: " + JSON.stringify(data);
+            function startCheckout(tier) {
+              const email = document.getElementById("email").value.trim();
+              if (!email) {
+                alert("Enter your email first.");
+                return;
               }
+
+              window.location.href =
+                "/billing/checkout/" + encodeURIComponent(tier) +
+                "?customer_email=" + encodeURIComponent(email);
             }
           </script>
         </body>
@@ -410,30 +463,50 @@ def tqnn_store():
     )
 
 
+# ======================================================
+# BILLING
+# ======================================================
+
 @app.post("/billing/checkout")
 def create_checkout(req: CheckoutRequest):
-    if not STRIPE_SECRET_KEY:
-        raise HTTPException(status_code=500, detail="Stripe not configured")
+    """
+    JSON checkout endpoint.
 
-    tier = req.tier.lower()
-    price_id = PRICE_BY_TIER.get(tier)
+    Body:
+    {
+      "customer_email": "dev@example.com",
+      "tier": "tier1"
+    }
 
-    if not price_id:
-        raise HTTPException(status_code=400, detail=f"Unknown or unset tier: {tier}")
+    Returns:
+    {
+      "checkout_url": "https://checkout.stripe.com/..."
+    }
+    """
+    checkout_url = create_stripe_checkout_session(req)
+    return {"checkout_url": checkout_url}
 
-    try:
-        session = stripe.checkout.Session.create(
-            mode="subscription",
-            success_url=SUCCESS_URL,
-            cancel_url=CANCEL_URL,
-            line_items=[{"price": price_id, "quantity": 1}],
-            customer_email=req.customer_email,
-            metadata={"tqnn_tier": tier},
+
+@app.get("/billing/checkout/{tier}")
+def checkout_redirect(
+    tier: str,
+    customer_email: EmailStr = Query(...),
+):
+    """
+    Browser-friendly checkout endpoint.
+
+    This avoids frontend CORS/fetch issues:
+    https://.../billing/checkout/tier1?customer_email=dev@example.com
+
+    It redirects the browser straight to Stripe Checkout.
+    """
+    checkout_url = create_stripe_checkout_session(
+        CheckoutRequest(
+            tier=tier,
+            customer_email=customer_email,
         )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Stripe error: {e}")
-
-    return {"checkout_url": session.url}
+    )
+    return RedirectResponse(url=checkout_url, status_code=303)
 
 
 @app.post("/stripe/webhook")
@@ -503,3 +576,4 @@ async def stripe_webhook(request: Request):
             deactivate_keys_for_subscription(sub_id, customer_id)
 
     return {"received": True}
+    
