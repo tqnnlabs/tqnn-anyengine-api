@@ -1,57 +1,30 @@
 TQNN AnyEngine API
 
-Commercial multi-domain inference API from TQNN Labs.
+Commercial multimodal inference infrastructure from TQNN Labs.
 
-Process structured data through a unified runtime interface using either the official Python SDK or direct REST API access.
-
----
-
-What is TQNN?
-
-TQNN AnyEngine is designed to process multiple forms of structured data through a single runtime.
-
-Supported modes:
-
-- EEG & Neural Signals
-- Finance & Market Data
-- Chemistry & Molecular Data
-- Text & Language Statistics
-- Tabular Datasets
-- Image Features
-- Custom Signal Analysis
-
-Any data in. TQNN inference out.
+Process structured data through the TQNN AnyEngine runtime using a simple REST API or the official Python SDK.
 
 ---
 
-Get API Access
+Overview
 
-API keys are available through TQNN Labs.
+TQNN AnyEngine provides unified inference across multiple data domains through a single runtime interface.
 
-Website:
+Supported Modes:
 
-https://tqnnlabs.com
+- EEG
+- Finance
+- Chemistry
+- Text
+- Tabular
+- Image
+- Any-Data
 
-After successful checkout, API keys are delivered automatically.
-
-Tier 1 — Starter
-
-- CA$23.99/month
-- 10,000 API calls
-
-Tier 2 — Builder
-
-- CA$79.99/month
-- 50,000 API calls
-
-Tier 3 — Scale
-
-- CA$249.99/month
-- 200,000 API calls
+The runtime is delivered as a managed cloud service.
 
 ---
 
-Install the SDK
+Install
 
 pip install tqnn
 
@@ -74,9 +47,34 @@ print(result)
 
 ---
 
+Get an API Key
+
+Choose a subscription plan and receive an API key automatically after checkout.
+
+Tier 1 — Starter
+
+- CA$23.99/month
+- 10,000 API calls
+
+Tier 2 — Builder
+
+- CA$79.99/month
+- 50,000 API calls
+
+Tier 3 — Scale
+
+- CA$249.99/month
+- 200,000 API calls
+
+Sign up at:
+
+https://tqnnlabs.com
+
+---
+
 REST API Example
 
-curl -X POST https://api.tqnnlabs.com/run/any \
+curl -X POST <runtime-endpoint> \
   -H "Content-Type: application/json" \
   -H "x-api-key: TQNN_xxxxxxxxx" \
   -d '{
@@ -102,42 +100,49 @@ Example Response
 
 Authentication
 
-All requests require an API key.
+All API requests require an API key.
 
 x-api-key: TQNN_xxxxxxxxx
 
-Usage is tracked automatically based on subscription tier.
+Usage is tracked automatically according to subscription tier.
 
 ---
 
-Documentation
+Runtime Status
 
-Interactive API Documentation:
+TQNN AnyEngine is currently available through the managed cloud runtime.
 
-https://api.tqnnlabs.com/docs
+API keys are active.
 
-Health Endpoint:
+Website:
+https://tqnnlabs.com
 
-https://api.tqnnlabs.com/health
+---
+
+SDK
+
+Official Python SDK:
+
+pip install tqnn
 
 ---
 
 Repository Contents
 
-Included:
+Included
 
-- Public API interface
-- Python SDK integration
-- Example clients
-- Documentation
+- API interface
+- SDK utilities
+- Client examples
 - Integration samples
+- Public documentation
 
-Not Included:
+Not Included
 
-- Proprietary runtime internals
-- Private infrastructure
-- Internal deployment assets
-- TQNN core substrate implementation
+- Internal runtime implementation
+- Proprietary infrastructure
+- Private deployment assets
+- Core inference substrate
 
 ---
 
@@ -154,9 +159,9 @@ The managed TQNN runtime service remains proprietary intellectual property of TQ
 
 ---
 
-Enterprise & Commercial Access
+Enterprise Access
 
-For enterprise licensing, custom integrations, partnerships, or deployment inquiries:
+For enterprise deployment, commercial licensing, custom integrations, or partnerships:
 
 tqnnlabs@gmail.com
 
@@ -164,14 +169,9 @@ tqnnlabs@gmail.com
 
 About TQNN Labs
 
-TQNN Labs develops multi-domain inference infrastructure and runtime services.
+TQNN Labs develops multimodal inference infrastructure and runtime services for structured data applications.
 
 Website:
 https://tqnnlabs.com
 
-Contact:
-tqnnlabs@gmail.com
-
 Built in Canada.
-
-Beyond Prediction. Toward Understanding.
