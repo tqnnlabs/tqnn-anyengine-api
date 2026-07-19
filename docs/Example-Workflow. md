@@ -1,45 +1,43 @@
-# TQNN Example Workflows
+# Example Workflows
 
-Each workflow shows a minimal “copy → paste → run” pattern.
-Replace sample arrays with your real data.
+The following examples demonstrate common ways to interact with the TQNN API using the official Python SDK.
+
+Replace the example data with your own structured datasets.
 
 ---
 
-# 🧠 EEG Workflow
+# EEG
 
 ```python
-from tqnn_client import TQNNClient
-import numpy as np, os
+from tqnn import TQNNClient
 
 client = TQNNClient(
-    api_key=os.getenv("TQNN_API_KEY"),
-    base_url=os.getenv("TQNN_API_URL")
+    api_key="YOUR_API_KEY"
 )
 
-sfreq = 250.0
-eeg_data = np.random.randn(3, 250).tolist()
-
-res = client.run_any(
+response = client.run_any(
     data=eeg_data,
     mode="EEG",
-    sfreq=sfreq,
-    label="eeg_demo"
+    task="motor_imagery",
+    label="subject_a_session_1",
+    metadata={
+        "sampling_rate": 250.0
+    }
 )
 
-print(res)
+print(response["result"])
+print(response["tqnn_report"])
 ```
 
 ---
 
-# 📊 Tabular Workflow
+# Tabular Data
 
 ```python
-from tqnn_client import TQNNClient
-import os
+from tqnn import TQNNClient
 
 client = TQNNClient(
-    api_key=os.getenv("TQNN_API_KEY"),
-    base_url=os.getenv("TQNN_API_URL")
+    api_key="YOUR_API_KEY"
 )
 
 dataset = [
@@ -48,76 +46,114 @@ dataset = [
     [0.7, 0.3, 1.2, 2.1]
 ]
 
-res = client.run_any(
+response = client.run_any(
     data=dataset,
     mode="TABULAR",
-    label="demo_table"
+    task="fault_diagnosis",
+    label="pump_window"
 )
 
-print(res)
+print(response["result"])
 ```
 
 ---
 
-# 📈 Finance Workflow
-
-Feed OHLCV + indicators.
+# Financial Data
 
 ```python
-from tqnn_client import TQNNClient
-import os
+from tqnn import TQNNClient
 
 client = TQNNClient(
-    api_key=os.getenv("TQNN_API_KEY"),
-    base_url=os.getenv("TQNN_API_URL")
+    api_key="YOUR_API_KEY"
 )
 
-# One row = snapshot
 finance_data = [
-   [open, high, low, close, volume, rsi, macd, signal, trend_slope]
+    [150.2, 151.8, 149.7, 151.1, 3250000, 58.4, 1.12, 0.96, 0.08]
 ]
 
-res = client.run_any(
+response = client.run_any(
     data=finance_data,
     mode="FINANCE",
-    label="TSLA"
+    task="trend_prediction",
+    label="AAPL_snapshot"
 )
 
-print(res)
+print(response["result"])
 ```
 
 ---
 
-# 🖼️ Image Workflow
-
-Flatten or tensor.
+# Image Features
 
 ```python
-from tqnn_client import TQNNClient
-import numpy as np, os
+from tqnn import TQNNClient
 
 client = TQNNClient(
-    api_key=os.getenv("TQNN_API_KEY"),
-    base_url=os.getenv("TQNN_API_URL")
+    api_key="YOUR_API_KEY"
 )
 
-img = np.random.rand(784).tolist()
+image_features = [
+    [0.12, 0.41, 0.83, 0.07]
+]
 
-res = client.run_any(
-    data=[img],
+response = client.run_any(
+    data=image_features,
     mode="IMAGE",
-    label="image_demo"
+    task="classification",
+    label="sample_image"
 )
 
-print(res)
+print(response["result"])
 ```
 
 ---
 
-# 🚨 Notes
+# Generic Structured Data
 
-- Any 2D numeric array is valid input
-- Model does not train
-- Model does not return gradients
-- All inference is substrate-driven
-- Internal logic remains sealed
+```python
+from tqnn import TQNNClient
+
+client = TQNNClient(
+    api_key="YOUR_API_KEY"
+)
+
+response = client.run_any(
+    data=my_data,
+    mode="ANY",
+    task="general_inference"
+)
+
+print(response["result"])
+print(response["tqnn_report"])
+```
+
+---
+
+# Working with Responses
+
+The SDK provides helper methods for accessing commonly used sections of the response.
+
+```python
+response = client.run_any(
+    data=my_data,
+    mode="TABULAR"
+)
+
+result = client.result(response)
+report = client.report(response)
+diagnostics = client.diagnostics(response)
+
+print(result)
+print(report)
+print(diagnostics)
+```
+
+---
+
+# Notes
+
+- TQNN accepts structured numeric data.
+- The same API can be used across multiple supported inference modes.
+- The `task` field provides application context for the request.
+- Every inference returns a standardized **TQNN Report** with confidence, observable data integrity, and diagnostics.
+- The API is intended for inference only and does not perform model training.
