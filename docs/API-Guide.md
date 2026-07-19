@@ -1,212 +1,277 @@
-# TQNN AnyEngine API — Developer Guide
+# TQNN API — Developer Guide
 
-This guide explains how to consume the TQNN AnyEngine API using:
-- Python client
-- direct HTTP requests
-- mode-specific payload formats
+Welcome to the TQNN API.
 
-⚠️ **Important**
-The TQNN Core Engine is a protected trade secret.  
-This guide describes the API surface only.  
-It does not reveal or imply internal substrate mechanisms.
+The TQNN API provides a unified interface for confidence-aware inference across structured data.
+
+Rather than returning only predictions, every inference includes a standardized **TQNN Report** describing confidence, observable input integrity, decision status, and diagnostics.
+
+This guide explains how to integrate with the API using:
+
+- The official Python SDK
+- Direct HTTP requests
+- Mode-specific payloads
+- Standardized API responses
 
 ---
 
-## 🔑 Authentication
+# Protected Runtime
 
-Every request must include:
+> **Notice**
+>
+> The TQNN Core Runtime is proprietary technology owned by TQNN Labs.
+>
+> This documentation describes the public API only. It does not expose or imply implementation details of the underlying inference runtime.
 
-```
+---
+
+# Authentication
+
+Every request requires an API key.
+
+```text
 x-api-key: YOUR_TQNN_API_KEY
 ```
 
-Keys are subscription-bound.  
-Usage is metered at runtime.
+API keys are linked to an active subscription.
+
+Usage is metered automatically.
 
 ---
 
-## 🔗 API Endpoint
+# Base URL
+
+```text
+https://api.tqnnlabs.com
+```
+
+---
+
+# Endpoint
+
+## Run Inference
+
+```text
+POST /run/any
+```
+
+---
+
+# Python SDK
+
+Install:
+
+```bash
+pip install tqnn
+```
 
 Example:
 
-```
-https://YOUR-TQNN-ENDPOINT/run_any
-```
-
----
-
-# 📦 Python Client Setup
-
-Install (PyPI — coming soon):
-
-```
-pip install tqnn-client
-```
-
-Until release, use `tqnn_client.py` from this repo.
-
----
-
-## 🧠 Core Client Example
-
 ```python
-from tqnn_client import TQNNClient
-import os
+from tqnn import TQNNClient
 
-BASE_URL = os.getenv("TQNN_API_URL", "https://YOUR-ENDPOINT")
-API_KEY  = os.getenv("TQNN_API_KEY")
+client = TQNNClient(
+    api_key="YOUR_API_KEY"
+)
 
-client = TQNNClient(api_key=API_KEY, base_url=BASE_URL)
-
-result = client.run_any(
-    data=[[1,2,3]],
+response = client.run_any(
+    data=[[1, 2, 3]],
     mode="TABULAR",
+    task="fault_diagnosis",
     label="demo"
 )
 
-print(result)
+print(response)
 ```
 
 ---
 
-# 🚀 Supported Modes
+# Direct HTTP Example
 
-The API accepts structured numeric arrays.
-
-## 1. EEG Mode
-
-### Input
-- shape: `(channels x samples)`
-- values: floats
-
-### Example EEG payload
-```json
-{
-  "mode": "EEG",
-  "label": "subject_A",
-  "sfreq": 250.0,
-  "data": [
-    [0.12, -0.33, 0.88, ...],
-    [0.01,  0.45, -0.55, ...],
-    ...
-  ]
-}
+```http
+POST /run/any
 ```
 
-### Output fields
-- `probs`: inference distribution
-- `threshold`: activation tau
-- `qualia`: substrate embedding snapshot
-- `intent`: decision vector
-
----
-
-## 2. Tabular Mode
-
-### Input
-- 2D matrix of samples → `[rows][features]`
-
-Example:
 ```json
 {
+  "data": [[1.2, 0.4, 3.3]],
   "mode": "TABULAR",
-  "label": "demo_table",
-  "data": [
-    [1.2, 0.4, 3.3, 0.1],
-    [2.1, 1.1, 0.9, 0.5]
-  ]
+  "task": "fault_diagnosis",
+  "label": "demo"
 }
 ```
 
 ---
 
-## 3. Finance Mode
+# Supported Modes
 
-### Input
-OHLCV or indicator matrices.
-Typical:
-- RSI
-- MACD
-- trend slope
-- volatility
-- price windows
+The API accepts structured numeric data.
 
-Example:
-```json
-{
-  "mode": "FINANCE",
-  "label": "TSLA",
-  "data": [
-    [open, high, low, close, volume, rsi, macd, signal, trend_slope]
-  ]
-}
-```
+## EEG
+
+Typical input:
+
+- channels × samples
+- floating point values
+- optional sampling frequency metadata
 
 ---
 
-## 4. Image Mode (Beta)
+## TABULAR
 
-Accepts:
-- flattened arrays
-- tensor-like lists
-
-Example:
-```json
-{
-  "mode": "IMAGE",
-  "label": "mnist",
-  "data": [[0.1, 0.3, 0.0, ...]]
-}
-```
-
----
-
-# 📫 Typical Response
-
-Example (all modes return comparable structure):
+Structured feature matrices.
 
 ```json
 {
   "mode": "TABULAR",
-  "label": "demo_table",
-  "probs": [0.18, 0.44, 0.38],
-  "threshold": 0.613,
-  "qualia": "...",
-  "intent": "...",
-  "usage": 41
+  "data": [
+    [1.2, 0.5, 3.1],
+    [0.7, 2.0, 1.8]
+  ]
 }
 ```
 
-### Field meanings
-- **probs** → inference distribution
-- **threshold (tau)** → substrate activation
-- **qualia** → internal embedding snapshot
-- **intent** → decision / phase geometry
-- **usage** → runtime quota balance
+---
+
+## FINANCE
+
+Typical inputs include:
+
+- OHLCV
+- Technical indicators
+- Sliding windows
+- Feature matrices
 
 ---
 
-# 🔥 Errors
+## IMAGE
 
-### 401
-Invalid key / missing key
+Structured image-derived features.
 
-### 429
-Quota exhausted
+Examples include:
 
-### 400
-Malformed payload
+- flattened vectors
+- embedding features
+- tensor-like numeric arrays
+
+---
+
+# Standard Response
+
+Every inference returns a standardized response.
+
+```json
+{
+  "platform": "TQNN",
+  "engine": "fault_tolerant_inference",
+
+  "result": {
+    "prediction_index": 1,
+    "prediction_label": "fault",
+    "confidence": 0.94,
+    "decision": "accept"
+  },
+
+  "tqnn_report": {
+
+  },
+
+  "diagnostics": {
+
+  }
+}
+```
 
 ---
 
-# 🚫 What is NOT exposed
+# Response Sections
 
-- substrate models
-- GHZ cobordism logic
-- phase routing
-- internal training
-- embedding reconstruction
+## result
 
-The API returns inference; not substrate internals.
+Primary prediction returned by the platform.
+
+Includes:
+
+- prediction
+- confidence
+- operational decision
 
 ---
+
+## tqnn_report
+
+Provides additional context including:
+
+- confidence assessment
+- observable input integrity
+- decision summary
+- warning messages
+
+---
+
+## diagnostics
+
+Developer-oriented information including:
+
+- confidence metrics
+- entropy
+- threshold evaluation
+- optional runtime metadata
+
+---
+
+# Common Errors
+
+## 400
+
+Malformed request.
+
+---
+
+## 401
+
+Missing or invalid API key.
+
+---
+
+## 422
+
+Request validation failed.
+
+---
+
+## 429
+
+Subscription quota exhausted.
+
+---
+
+## 500
+
+Unexpected server error.
+
+---
+
+# Security
+
+The public API intentionally exposes only the standardized inference interface.
+
+The following remain internal:
+
+- Runtime implementation
+- Internal orchestration
+- Protected inference methods
+- Proprietary optimization techniques
+- Deployment architecture
+
+---
+
+# Versioning
+
+Current API version:
+
+```text
+v2.0.0
+```
+
+Future versions will preserve backward compatibility whenever practical.
