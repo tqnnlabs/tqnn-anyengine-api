@@ -350,7 +350,9 @@ def send_api_key_email(
         white-space:pre-wrap;
       ">{api_key}</pre>
 
-      <p>Example:</p>
+            <p><b>Python Quick Start</b></p>
+
+      <p>Install the official TQNN SDK:</p>
 
       <pre style="
         background:#f4f4f4;
@@ -358,21 +360,41 @@ def send_api_key_email(
         border-radius:8px;
         white-space:pre-wrap;
         overflow-x:auto;
-      ">curl -X POST https://api.tqnnlabs.com/run/any \\
-  -H "Content-Type: application/json" \\
-  -H "x-api-key: {api_key}" \\
-  -d '{{
-    "data": [1, 2, 3, 4],
-    "mode": "TABULAR",
-    "task": "fault_diagnosis",
-    "label": "example",
-    "metadata": {{
-      "class_labels": [
-        "healthy",
-        "fault"
-      ]
+      ">pip install tqnn</pre>
+
+      <p>Run your first inference:</p>
+
+      <pre style="
+        background:#f4f4f4;
+        padding:12px;
+        border-radius:8px;
+        white-space:pre-wrap;
+        overflow-x:auto;
+      ">from tqnn import TQNNClient
+
+client = TQNNClient(
+    api_key="{api_key}"
+)
+
+result = client.run_any(
+    data=[1, 2, 3, 4],
+    mode="TABULAR",
+    task="fault_diagnosis",
+    label="example",
+    metadata={{
+        "class_labels": [
+            "healthy",
+            "fault"
+        ]
     }}
-  }}'</pre>
+)
+
+print(result)</pre>
+
+      <p>
+        The TQNN SDK automatically connects to the official
+        cloud API. No base URL configuration is required.
+      </p>
 
       <p>
         Keep this key private. Do not publish it or
